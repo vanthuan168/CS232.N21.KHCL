@@ -60,6 +60,7 @@ if option_1 == 'Text':
 
         with open(output_path, "rb") as file:
             byte_array = file.read()
+            st.write(byte_array)
             binary_string = ''.join(format(byte, '08b') for byte in byte_array)
             st.write(binary_string)
         st.write("Input size:", os.stat(path).st_size, "(bytes).")
