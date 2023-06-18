@@ -1,10 +1,7 @@
-import pandas as pd
-from collections import Counter
-from math import log, ceil
-from bitstring import BitArray, Bits
 import os
 import heapq
 import time
+
 
 class BinaryTree:
     def __init__(self, value, frequ):
@@ -19,8 +16,8 @@ class BinaryTree:
     def __eq__(self, other):
         return self.frequ == other.frequ
 
-class Huffmancode:
 
+class Huffmancode:
     def __init__(self, path):
         self.path = path
         self.__heap = []
@@ -73,7 +70,7 @@ class Huffmancode:
 
     def __Build_Padded_Text(self, encoded_text):
         padding_value = 8 - (len(encoded_text) % 8)
-        for _ in range(padding_value):
+        for i in range(padding_value):
             encoded_text += '0'
         padded_info = "{0:08b}".format(padding_value)
         padded_encoded_text = padded_info + encoded_text
@@ -82,42 +79,25 @@ class Huffmancode:
     def __Build_Byte_Array(self, padded_text):
         array = []
         for i in range(0, len(padded_text), 8):
-            byte = padded_text[i:i+8]
+            byte = padded_text[i:i + 8]
             array.append(int(byte, 2))
         return array
 
     def compression(self):
-        # To access the file and extract text from that file.
-        filename, _ = os.path.splitext(self.path)
-        output_path = filename + "_encoded.bin"
-        with open(self.path, 'r+') as file, open(output_path, 'wb') as output:
+        filename, file_extension = os.path.splitext(self.path)
+        output_path = 'encoded_huffman1.txt'
+        with open(self.path, 'r',encoding='utf-8', errors='ignore') as file, open(output_path, 'wb') as output:
             text = file.read()
             text = text.rstrip()
-
             frequency_dict = self.__frequency_from_text(text)
-
-            # Calculate frequency of each text and store it in frequency dictionary.
             self.__Build_heap(frequency_dict)
-
-            # Construct binary tree from Heap.
             self.__Build_Binary_Tree()
-
-            # Construct code from binary tree and store it in a dictionary.
             self.__Build_Tree_Code()
-
-            # Construct encoded text.
             encoded_text = self.__Build_Encoded_Text(text)
-
-            # Padding of text.
             padded_text = self.__Build_Padded_Text(encoded_text)
-
-            # Convert padded text to byte array.
             bytes_array = self.__Build_Byte_Array(padded_text)
-
-            # Write byte array to output file.
             final_bytes = bytes(bytes_array)
             output.write(final_bytes)
-
         print("Compressed")
         return output_path
 
@@ -140,9 +120,9 @@ class Huffmancode:
         return decoded_text
 
     def decompress(self, input_path):
-        filename, _ = os.path.splitext(input_path)
-        output_path = filename.split('_')[0] + "_decoded.txt"
-        with open(input_path, 'rb') as file, open(output_path, 'w') as output:
+        filename, file_extension = os.path.splitext(input_path)
+        output_path = 'decoded_huffman.txt'
+        with open(input_path, 'rb') as file, open(output_path, 'w',encoding='utf-8') as output:
             bit_string = ''
             byte = file.read(1)
             while byte:
@@ -150,7 +130,8 @@ class Huffmancode:
                 bits = bin(byte)[2:].rjust(8, '0')
                 bit_string += bits
                 byte = file.read(1)
-
             actual_text = self.__Remove_Padding(bit_string)
             decompressed_text = self.__Decompress_Text(actual_text)
             output.write(decompressed_text)
+        print("Decompressed")
+        return
