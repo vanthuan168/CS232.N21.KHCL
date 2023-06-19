@@ -2,6 +2,7 @@ import os
 import heapq
 import time
 
+import settings
 
 class BinaryTree:
     def __init__(self, value, frequ):
@@ -85,7 +86,7 @@ class Huffmancode:
 
     def compression(self):
         filename, file_extension = os.path.splitext(self.path)
-        output_path = 'encoded_huffman1.txt'
+        output_path = settings.root_path / (filename + '_encoded_huffman.txt')
         with open(self.path, 'r',encoding='utf-8', errors='ignore') as file, open(output_path, 'wb') as output:
             text = file.read()
             text = text.rstrip()
@@ -121,7 +122,7 @@ class Huffmancode:
 
     def decompress(self, input_path):
         filename, file_extension = os.path.splitext(input_path)
-        output_path = 'decoded_huffman.txt'
+        output_path = settings.root_path / (filename.split('_')[0] + '_decoded_huffman.txt')
         with open(input_path, 'rb') as file, open(output_path, 'w',encoding='utf-8') as output:
             bit_string = ''
             byte = file.read(1)
