@@ -16,3 +16,4 @@ if root_path not in sys.path:
 ROOT = root_path.relative_to(Path.cwd())
 
 text_dir = ROOT / 'text'
+image_dir = ROOT / 'image'
