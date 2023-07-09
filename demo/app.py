@@ -13,6 +13,8 @@ from PIL import Image
 import PIL
 import collections
 import random
+import shutil
+from collections import defaultdict
 
 import lib.huffman as Huffman
 import lib.lzw as lzw
@@ -855,118 +857,19 @@ else:
             encode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_compressed_huffman.txt')
             show_button_download = False
             if button_encode:
-                print("Huffman Compression Program")
-                h = 1
-                # print("=================================================================")
-                # h = int(input("Enter 1 if you want to input an colour image file, 2 for default gray scale case:"))
-                if h == 1:
-                    my_string = np.asarray(Image.open(path),np.uint8)
-                    shape = my_string.shape
-                    a = my_string
-                    print ("Enetered string is:",my_string)
-                    my_string = str(my_string.tolist())
-                # elif h == 2:
-                #     array = np.arange(0, 737280, 1, np.uint8)
-                #     my_string = np.reshape(array, (1024, 720))
-                #     #print ("Enetered string is:",my_string)
-                #     a = my_string
-                #     my_string = str(my_string.tolist())
-
-                else:
-                    print("You entered invalid input")                    # taking user input
+                h = Huffman.Huffmancode_img(path)
 
                 t0 = time.time()
-                letters = []
-                only_letters = []
-                for letter in my_string:
-                    if letter not in letters:
-                        frequency = my_string.count(letter)             #frequency of each letter repetition
-                        letters.append(frequency)
-                        letters.append(letter)
-                        only_letters.append(letter)
-
-                nodes = []
-                while len(letters) > 0:
-                    nodes.append(letters[0:2])
-                    letters = letters[2:]                               # sorting according to frequency
-                nodes.sort()
-                huffman_tree = []
-                huffman_tree.append(nodes)                             #Make each unique character as a leaf node
-
-                def combine_nodes(nodes):
-                    pos = 0
-                    newnode = []
-                    if len(nodes) > 1:
-                        nodes.sort()
-                        nodes[pos].append("1")                       # assigning values 1 and 0
-                        nodes[pos+1].append("0")
-                        combined_node1 = (nodes[pos] [0] + nodes[pos+1] [0])
-                        combined_node2 = (nodes[pos] [1] + nodes[pos+1] [1])  # combining the nodes to generate pathways
-                        newnode.append(combined_node1)
-                        newnode.append(combined_node2)
-                        newnodes=[]
-                        newnodes.append(newnode)
-                        newnodes = newnodes + nodes[2:]
-                        nodes = newnodes
-                        huffman_tree.append(nodes)
-                        combine_nodes(nodes)
-                    return huffman_tree                                     # huffman tree generation
-
-                newnodes = combine_nodes(nodes)
-
-                huffman_tree.sort(reverse = True)
-                #print("Huffman tree with merged pathways:")
-
-                checklist = []
-                for level in huffman_tree:
-                    for node in level:
-                        if node not in checklist:
-                            checklist.append(node)
-                        else:
-                            level.remove(node)
-                count = 0
-                #for level in huffman_tree:
-                    #print("Level", count,":",level)             #print huffman tree
-                    #count+=1
-                #print()
-
-                letter_binary = []
-                if len(only_letters) == 1:
-                    lettercode = [only_letters[0], "0"]
-                    letter_binary.append(lettercode*len(my_string))
-                else:
-                    for letter in only_letters:
-                        code =""
-                        for node in checklist:
-                            if len (node)>2 and letter in node[1]:           #genrating binary code
-                                code = code + node[2]
-                        lettercode =[letter,code]
-                        letter_binary.append(lettercode)
-                #print(letter_binary)
-                #print("Binary code generated:")
-                #for letter in letter_binary:
-                    #print(letter[0], letter[1])
-
-                bitstring =""
-                for character in my_string:
-                    for item in letter_binary:
-                        if character in item:
-                            bitstring = bitstring + item[1]
-                binary ="0b"+bitstring
-                #print("Your message as binary is:")
-                                                        # binary code generated
-
-                uncompressed_file_size = len(my_string)*7
-                compressed_file_size = len(binary)-2
-
-                
-                output = open(encode_file_name,"w+")
-                output.write(bitstring)
+                output_path, shape, text, encoded_text= h.compression_img()
                 t1 = time.time()
-                total_1 = t1-t0
+                total_1 = t1 - t0
 
-                st.write("Your original file size was", uncompressed_file_size,"(bits). \nThe compressed size is:",compressed_file_size,'(bits).')
-                st.write("This is a saving of ",uncompressed_file_size-compressed_file_size,"(bits).")
+                uncompressed_file_size = len(text) * 7
+                compressed_file_size = len(encoded_text)
+
+                st.write("Your original file size was", uncompressed_file_size,"bits.")
+                st.write('The compressed size is:',compressed_file_size,'bits')
+                st.write("This is a saving of ",uncompressed_file_size - compressed_file_size,"bits.")
                 r = uncompressed_file_size/compressed_file_size
                 st.write("Tỷ số nén:", round(r,5))
                 st.write("Tỷ lệ nén:", round(1/r*100,2), "%")
@@ -976,280 +879,196 @@ else:
                 st.write("Thời gian nén:", round(total_1,5), "(giây).")
             if button_decode:
                 st.write("Decoding.......")
-                h = 1
-                # print("=================================================================")
-                # h = int(input("Enter 1 if you want to input an colour image file, 2 for default gray scale case:"))
-                if h == 1:
-                    my_string = np.asarray(Image.open(path),np.uint8)
-                    shape = my_string.shape
-                    a = my_string
-                    print ("Enetered string is:",my_string)
-                    my_string = str(my_string.tolist())
-                # elif h == 2:
-                #     array = np.arange(0, 737280, 1, np.uint8)
-                #     my_string = np.reshape(array, (1024, 720))
-                #     #print ("Enetered string is:",my_string)
-                #     a = my_string
-                #     my_string = str(my_string.tolist())
-
-                else:
-                    print("You entered invalid input")                    # taking user input
+                h = Huffman.Huffmancode_img(path)
 
                 t0 = time.time()
-                letters = []
-                only_letters = []
-                for letter in my_string:
-                    if letter not in letters:
-                        frequency = my_string.count(letter)             #frequency of each letter repetition
-                        letters.append(frequency)
-                        letters.append(letter)
-                        only_letters.append(letter)
+                output_path, shape, text, encoded_text= h.compression_img()
+                t1 = time.time()
+                total_1 = t1 - t0 
 
-                nodes = []
-                while len(letters) > 0:
-                    nodes.append(letters[0:2])
-                    letters = letters[2:]                               # sorting according to frequency
-                nodes.sort()
-                huffman_tree = []
-                huffman_tree.append(nodes)                             #Make each unique character as a leaf node
-
-                def combine_nodes(nodes):
-                    pos = 0
-                    newnode = []
-                    if len(nodes) > 1:
-                        nodes.sort()
-                        nodes[pos].append("1")                       # assigning values 1 and 0
-                        nodes[pos+1].append("0")
-                        combined_node1 = (nodes[pos] [0] + nodes[pos+1] [0])
-                        combined_node2 = (nodes[pos] [1] + nodes[pos+1] [1])  # combining the nodes to generate pathways
-                        newnode.append(combined_node1)
-                        newnode.append(combined_node2)
-                        newnodes=[]
-                        newnodes.append(newnode)
-                        newnodes = newnodes + nodes[2:]
-                        nodes = newnodes
-                        huffman_tree.append(nodes)
-                        combine_nodes(nodes)
-                    return huffman_tree                                     # huffman tree generation
-
-                newnodes = combine_nodes(nodes)
-
-                huffman_tree.sort(reverse = True)
-                #print("Huffman tree with merged pathways:")
-
-                checklist = []
-                for level in huffman_tree:
-                    for node in level:
-                        if node not in checklist:
-                            checklist.append(node)
-                        else:
-                            level.remove(node)
-                count = 0
-                #for level in huffman_tree:
-                    #print("Level", count,":",level)             #print huffman tree
-                    #count+=1
-                #print()
-
-                letter_binary = []
-                if len(only_letters) == 1:
-                    lettercode = [only_letters[0], "0"]
-                    letter_binary.append(lettercode*len(my_string))
-                else:
-                    for letter in only_letters:
-                        code =""
-                        for node in checklist:
-                            if len (node)>2 and letter in node[1]:           #genrating binary code
-                                code = code + node[2]
-                        lettercode =[letter,code]
-                        letter_binary.append(lettercode)
-                #print(letter_binary)
-                #print("Binary code generated:")
-                #for letter in letter_binary:
-                    #print(letter[0], letter[1])
-
-                bitstring =""
-                for character in my_string:
-                    for item in letter_binary:
-                        if character in item:
-                            bitstring = bitstring + item[1]
-                binary ="0b"+bitstring
-                #print("Your message as binary is:")
-                                                        # binary code generated
-
-                uncompressed_file_size = len(my_string)*7
-                compressed_file_size = len(binary)-2
                 t2 = time.time()
-                bitstring = str(binary[2:])
-                
-                uncompressed_string =""
-                code =""
-                for digit in bitstring:
-                    code = code+digit
-                    pos=0                                        #iterating and decoding
-                    for letter in letter_binary:
-                        if code ==letter[1]:
-                            uncompressed_string=uncompressed_string+letter_binary[pos] [0]
-                            code=""
-                        pos+=1
+                decompressed_text = h.decompress_img(output_path)
+                t3 = time.time()
+                total_2 = t3 - t2
 
-                #st.write("Your UNCOMPRESSED data is:")
-                if h == 1:
-                    temp = re.findall(r'\d+', uncompressed_string)
-                    res = list(map(int, temp))
-                    res = np.array(res)
-                    res = res.astype(np.uint8)
-                    res = np.reshape(res, shape)
-                    #st.write(res)
-                    st.write("Observe the shapes and input and output arrays are matching or not")
-                    st.write("Input image dimensions:",shape)
-                    st.write("Output image dimensions:",res.shape)
-                    data = Image.fromarray(res)
-                    decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0]+'_uncompressed_huffman.jpg')
-                    data.save(decode_file_name)
-                    if a.all() == res.all():
-                        st.write("Success")
-                        t3 = time.time()
-                        total_2 = t3-t2
-                        st.write("Thời gian giải nén:", round(total_2,5), "(giây).")
+                # Chuyển decompressed_text thành image
+                temp = re.findall(r'\d+', decompressed_text)
+                res = list(map(int, temp))
+                res = np.array(res)
+                res = res.astype(np.uint8)
+                res = np.reshape(res, shape)
+        
+                st.write("Observe the shapes and input and output arrays are matching or not")
+                st.write("Input image dimensions:",shape)
+                st.write("Output image dimensions:",res.shape)
+                data = Image.fromarray(res)
+                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0]+'_uncompressed_huffman.jpg')
+                data.save(decode_file_name)
 
-                    def download_file(file_data, file_name):
-                        with open(file_name, "w+") as file:
-                            file.write(file_data)
-                        st.success("Tệp tin '{}' đã được tải xuống thành công.".format(file_name))
+                st.success("Success")
+                t3 = time.time()
+                total_2 = t3-t2
+                st.write("Thời gian giải nén:", round(total_2,5), "(giây).")
 
-                    col_img_1, col_img_2 = st.columns(2)
-                    with col_img_1:
-                        st.image(uploaded_file_image, caption='Original Image',
-                                use_column_width=True)
-                    with col_img_2:
-                        decode_image = PIL.Image.open(decode_file_name)
-                        st.image(decode_image, caption='Decoded Image', use_column_width=True)
-                    
-                #     file_name = "compressed_huffman.txt"  # Tên của tệp tin
+                col_img_1, col_img_2 = st.columns(2)
+                with col_img_1:
+                    st.image(uploaded_file_image, caption='Original Image',
+                            use_column_width=True)
+                with col_img_2:
+                    decode_image = PIL.Image.open(decode_file_name)
+                    st.image(decode_image, caption='Decoded Image', use_column_width=True)
 
-                # show_button_download = True
-                # if show_button_download:
-                #     if st.sidebar.button("Tải xuống"):
-                #         st.write('Đã tải xuống')
-                
         elif option_2 == "LZW":
-            st.write('2')
-        elif option_2 == 'Shannon':
-            encode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_compressed_shannon.txt')
+            encode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_compressed_lzw.txt')
+
             if button_encode:
-
-                h = 1
-                if h == 1:
-                    res_2 = Image.open(path)
-                    my_string = np.asarray(Image.open(path),np.uint8)
-                    sudhi = my_string
-                    shape = my_string.shape
-                    #print ("Enetered string is:",my_string)
-                    message = str(my_string.tolist())
-                
+                s1, shape = lzw.read_image_to_string(path)
                 t0 = time.time()
-                c = {}
+                output_code= lzw.encoding_img(s1)
 
-                code = shannon.label_list(shannon.create_list(message))
-                #print("Shannon's Encoded Code:")
-                output = open(encode_file_name,"w+")          # generating output binary
-                letter_binary = []
-                for key, value in code.items():
-                    #print(key, ' : ', value)
-                    letter_binary.append([key,value])
-
-                for a in message:
-                    for key, value in code.items():
-                        if key in a:
-                            #print(key, ' : ', value)
-                            output.write(value)
+                # tinh size
+                arr_output_code = np.asarray(output_code,np.uint8)
+                output_string = " ".join(map(str, arr_output_code.tolist()))
+                uncompressed_size = len(s1) * 7
+                compressed_size = len(output_string) * 7
                 t1 = time.time()
                 total_1 = t1-t0
+                lzw.save_binary_file(output_code, encode_file_name)
 
-                t2 = time.time()
-                output = open(encode_file_name,"r")
-                intermediate = output.readlines()
-                bitstring = ""
-                for digit in intermediate:
-                    bitstring = bitstring + digit
-                binary ="0b"+bitstring
-
-                uncompressed_file_size = len(message)*7
-                compressed_file_size = len(binary)-2
-                r = uncompressed_file_size/compressed_file_size
-                st.write("Your original file size was", uncompressed_file_size,"(bits). \nThe compressed size is:",compressed_file_size,"(bits).")
-                st.write("This is a saving of ",uncompressed_file_size-compressed_file_size,"(bits).")
-                r = uncompressed_file_size/compressed_file_size
+                # Show kết quả 
+                r = uncompressed_size/compressed_size
+                st.write("Your original file size was", uncompressed_size,"bits.") 
+                st.write('The compressed size is:',compressed_size,"bits.")
+                st.write("This is a saving of ",uncompressed_size - compressed_size,"bits.")
                 st.write("Tỷ số nén:", round(r,5))
                 st.write("Tỷ lệ nén:", round(1/r*100,2), "%")
                 st.write("Hiệu suất nén:", 100-round(1/r*100,2), "%")
                 st.write("Compressed file generated as {}".format(encode_file_name))
                 st.write("Thời gian nén:", round(total_1,5), "(giây).")
             if button_decode:
-                res_2 = Image.open(path)
-                my_string = np.asarray(Image.open(path),np.uint8)
-                sudhi = my_string
-                shape = my_string.shape
-                #print ("Enetered string is:",my_string)
-                message = str(my_string.tolist())
-            
-                t0 = time.time()
-                c = {}
-
-                code = shannon.label_list(shannon.create_list(message))
-                #print("Shannon's Encoded Code:")
-                output = open(encode_file_name,"w+")          # generating output binary
-                letter_binary = []
-                for key, value in code.items():
-                    #print(key, ' : ', value)
-                    letter_binary.append([key,value])
-
-                for a in message:
-                    for key, value in code.items():
-                        if key in a:
-                            #print(key, ' : ', value)
-                            output.write(value)
-                t1 = time.time()
-                total_1 = t1-t0
+                s1, shape = lzw.read_image_to_string(path)
+                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_uncompressed_lzw.jpg')
 
                 t2 = time.time()
-                output = open(encode_file_name,"r")
-                intermediate = output.readlines()
-                bitstring = ""
-                for digit in intermediate:
-                    bitstring = bitstring + digit
-                binary ="0b"+bitstring
-
-                uncompressed_file_size = len(message)*7
-                compressed_file_size = len(binary)-2
-                r = uncompressed_file_size/compressed_file_size
+                Decode_code = lzw.load_binary_file(encode_file_name)
+                output = lzw.decoding_img(Decode_code,shape)
+                temp = re.findall(r'\d+', output)
+                res = list(map(int, temp))
+                res = np.array(res)
+                res = res.astype(np.uint8)
+                res = np.reshape(res, shape)
+                
+                # show kết quả
                 st.write("Decoding.......")
-
-                uncompressed_string =""
-                code =""
-                for digit in bitstring:
-                    code = code+digit
-                    pos=0
-                    for letter in letter_binary:               # decoding the binary and genrating original data
-                        if code ==letter[1]:
-                            uncompressed_string=uncompressed_string+letter_binary[pos] [0]
-                            code=""
-                        pos+=1
-
-                #print("Your UNCOMPRESSED data is:")
-                # temp = re.findall(r'\d+', uncompressed_string)
-                # res = list(map(int, temp))
-                # res = np.array(res)
-                # res = res.astype(np.uint8)
-                # res = np.reshape(res, shape)
-                # #print(res)
-                # st.write("Observe the shapes and input and output arrays are matching or not")
-                # st.write("Input image dimensions:",shape)
-                # st.write("Output image dimensions:",res.shape)
-                data = res_2
-                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_uncompressed_shannon.png')
+                st.write("Observe the shapes and input and output arrays are matching or not")
+                st.write("Input image dimensions:",shape)
+                st.write("Output image dimensions:",res.shape)
+                data = Image.fromarray(res)
                 data.save(decode_file_name)
-                #if sudhi.all() == res.all():
+                t3 = time.time()
+                total_2 = t3-t2
+                st.write("Thời gian giải nén:", round(total_2,5), "(giây).")
+
+                col_img_1, col_img_2 = st.columns(2)
+                with col_img_1:
+                    st.image(uploaded_file_image, caption='Original Image',
+                            use_column_width=True)
+                with col_img_2:
+                    decode_image = PIL.Image.open(decode_file_name)
+                    st.image(decode_image, caption='Decoded Image', use_column_width=True)
+        elif option_2 == 'Shannon':
+            encode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_compressed_shannon.txt')
+            dict_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_dict_shannon.csv')
+            if button_encode:
+                t0 = time.time()
+                # Read file
+                content, shape = shannon.read_image_to_string(path)
+
+                # Count character
+                count = Counter(content)
+                total = sum(count.values())
+                char = [x[::-1] for x in list(count.items())]
+                char.sort(reverse=True)
+
+                # Create dictionary
+                _dict = dict()
+                shannon.generate(char,total,_dict)
+
+                # Encode
+                code = ''
+                for c in content:
+                    code += _dict[c]
+                code_bin = BitArray(bin = code)
+                max_bin = len(code)
+
+                # Save file
+                # output
+                with open(encode_file_name, "wb") as f:
+                    code_bin.tofile(f)
+                # dict
+                keys = []
+                values = []
+                for key in _dict:
+                    keys.append(_dict[key])
+                    values.append(key)
+                encoded = {'keys': list(keys), 'values': list(values)}
+                df = pd.DataFrame(encoded)
+                df.to_csv(dict_file_name, index=False)
+                t1 = time.time()
+                total_1 = t1-t0
+                uncompressed_file_size = len(content)*7
+                compressed_file_size = len(code)
+                r = uncompressed_file_size/compressed_file_size
+                st.write("Your original file size was", uncompressed_file_size,"bits.")
+                st.write('The compressed size is:',compressed_file_size,"bits.")
+                st.write("This is a saving of ",uncompressed_file_size-compressed_file_size,"bits.")
+                # r = uncompressed_file_size/compressed_file_size
+                st.write("Tỷ số nén:", round(r,5))
+                st.write("Tỷ lệ nén:", round(1/r*100,2), "%")
+                st.write("Hiệu suất nén:", 100-round(1/r*100,2), "%")
+                st.write("Compressed file generated as {}".format(encode_file_name))
+                st.write("Thời gian nén:", round(total_1,5), "(giây).")
+            if button_decode:
+                #  Decode
+                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_uncompressed_shannon.jpg')
+
+                content, shape = shannon.read_image_to_string(path)
+                t2 = time.time()
+                # Read dictionary
+                df = pd.read_csv(dict_file_name,dtype=str)
+                keys = list(df['keys'])
+                values = list(df['values'])
+                _dict = dict(zip(keys,values))
+                # code = ''
+                # st.write(_dict)
+                # for c in content:
+                #     code += _dict[c]
+                # code_bin = BitArray(bin = code)
+                # max_bin = len(code)
+                with open(encode_file_name,'rb') as f:
+                    data = Bits(f)
+                # Decode
+                string = ''
+                s = ''
+                for c in data.bin[:len(data)]:
+                    if s+c not in _dict:
+                        s+=c
+                    else:
+                        string+=_dict[s+c]
+                        s = ''
+
+                # Save file
+                temp = re.findall(r'\d+', string)
+                res = list(map(int, temp))
+                res = np.array(res)
+                res = res.astype(np.uint8)
+                res = np.reshape(res, shape)
+                #print(res)
+                st.write("Observe the shapes and input and output arrays are matching or not")
+                st.write("Input image dimensions:",shape)
+                st.write("Output image dimensions:",res.shape)
+                data = Image.fromarray(res)
+                data.save(decode_file_name)
                 t3 = time.time()
                 total_2 = t3-t2
                 st.write("Thời gian giải nén:", round(total_2,5), "(giây).")
@@ -1264,7 +1083,6 @@ else:
             
                 
         else:
-            st.write('4')
             if button_encode:
                 res_2 = Image.open(path)
                 my_string = np.asarray(Image.open(path),np.uint8)
@@ -1288,7 +1106,7 @@ else:
                 for key, value in code.items():
                     #print(key, ' : ', value)
                     letter_binary.append([key,value])
-                st.write("Compressed file generated as {}".format(encode_file_name))
+                # st.write("Compressed file generated as {}".format(encode_file_name))
                 i=0
                 for a in message:
                     for key, value in code.items():
@@ -1311,9 +1129,10 @@ else:
                 uncompressed_file_size = len(message)*7
                 compressed_file_size = len(binary)-2
                 r = uncompressed_file_size/compressed_file_size
-                st.write("Your original file size was", uncompressed_file_size,"(bits). \nThe compressed size is:",compressed_file_size,"(bits).")
-                st.write("This is a saving of ",uncompressed_file_size-compressed_file_size,"(bits).")
-                r = uncompressed_file_size/compressed_file_size
+                st.write("Your original file size was", uncompressed_file_size,"bits.")
+                st.write('The compressed size is:',compressed_file_size,"bits.")
+                st.write("This is a saving of ",uncompressed_file_size-compressed_file_size,"bits.")
+                # r = uncompressed_file_size/compressed_file_size
                 st.write("Tỷ số nén:", round(r,5))
                 st.write("Tỷ lệ nén:", round(1/r*100,2), "%")
                 st.write("Hiệu suất nén:", 100-round(1/r*100,2), "%")
@@ -1342,7 +1161,7 @@ else:
                 for key, value in code.items():
                     #print(key, ' : ', value)
                     letter_binary.append([key,value])
-                st.write("Compressed file generated as {}".format(encode_file_name))
+                # st.write("Compressed file generated as {}".format(encode_file_name))
                 i=0
                 for a in message:
                     for key, value in code.items():
@@ -1362,9 +1181,9 @@ else:
                     bitstring = bitstring + digit
                 binary ="0b"+bitstring
 
-                uncompressed_file_size = len(message)*7
-                compressed_file_size = len(binary)-2
-                r = uncompressed_file_size/compressed_file_size
+                # uncompressed_file_size = len(message)*7
+                # compressed_file_size = len(binary)-2
+                # r = uncompressed_file_size/compressed_file_size
 
                 st.write("Decoding.......")
 
@@ -1379,17 +1198,17 @@ else:
                             code=""
                         pos+=1
 
-                #temp = re.findall(r'\d+', uncompressed_string)
-                #res = list(map(int, temp))
-                #res = np.array(res)
-                #res = res.astype(np.uint8)
-                #res = np.reshape(res, shape)
+                temp = re.findall(r'\d+', uncompressed_string)
+                res = list(map(int, temp))
+                res = np.array(res)
+                res = res.astype(np.uint8)
+                res = np.reshape(res, shape)
                 #st.write(res)
-                #st.write("Observe the shapes and input and output arrays are matching or not")
-                #st.write("Input image dimensions:",shape)
-                #st.write("Output image dimensions:",res.shape)
-                data = res_2
-                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_uncompressed_fano.png')
+                st.write("Observe the shapes and input and output arrays are matching or not")
+                st.write("Input image dimensions:",shape)
+                st.write("Output image dimensions:",res.shape)
+                decode_file_name = settings.image_dir / (uploaded_file_image.name.split('.')[0] + '_uncompressed_fano.jpg')
+                data = Image.fromarray(res)
                 data.save(decode_file_name)
                 #if sudhi.all() == res.all():
                 st.success("Success")

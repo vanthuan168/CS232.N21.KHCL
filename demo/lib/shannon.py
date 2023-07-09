@@ -6,6 +6,11 @@ import os
 import heapq
 import time
 import collections
+from PIL import Image
+import re
+import sys
+import re
+import numpy as np
 
 def load_file(input):
     with open(input, encoding="utf-8") as f:
@@ -96,3 +101,12 @@ def label_list(list):
         return
     label_list(list2)
     return c
+
+def read_image_to_string(file_path):
+    my_string = np.asarray(Image.open(file_path),np.uint8)
+    sudhi = my_string
+    shape = my_string.shape
+    print ("Enetered string is:",my_string)
+    stringToEncode = str(my_string.tolist())
+    s1 = stringToEncode
+    return s1,shape

@@ -1,0 +1,7 @@
+Demo 
+- Sửa ảnh của huffman, lzw, shannon
+- Đọc code huffman
+Báo cáo
+- hoàn thành bảng kết quả
+- Nhận xét kết quả
+- chỉnh sửa slide
