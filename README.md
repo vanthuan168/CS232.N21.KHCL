@@ -22,3 +22,6 @@ Tính toán đa phương tiện
 * **Mã lớp:** CS232.N21.KHCL
 * **Giảng viên**: ThS.Đỗ Văn Tiến
 
+## ĐỒ ÁN CUỐI KÌ
+* **Tên đề tài:** NÉN ẢNH VÀ TEXT VỚI THUẬT TOÁN HUFFMAN, LZW, SHANNON VÀ FANO 
+
