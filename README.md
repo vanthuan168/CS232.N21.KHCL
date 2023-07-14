@@ -1,4 +1,4 @@
-# CS232.M22.KHCL
+# CS232.N21.KHCL
 Tính toán đa phương tiện
 <!-- Banner -->
 <p align="center">
@@ -19,6 +19,6 @@ Tính toán đa phương tiện
 ## GIỚI THIỆU MÔN HỌC
 * **Tên môn học:** Tính toán đa phương tiện
 * **Mã môn học:** CS232
-* **Mã lớp:** CS232.M22.KHCL
+* **Mã lớp:** CS232.N21.KHCL
 * **Giảng viên**: ThS.Đỗ Văn Tiến
 
