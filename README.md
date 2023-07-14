@@ -1,4 +1,4 @@
-# CS232.N21.KHCL
+# CS232.M22.KHCL
 Tính toán đa phương tiện
 <!-- Banner -->
 <p align="center">
