@@ -12,7 +12,7 @@ Tính toán đa phương tiện
 ## THÀNH VIÊN NHÓM
 | STT    | MSSV          | Họ và Tên         | Email                   | Phân chia công việc | Mức độ hoàn thành|
 | ------ |:-------------:| ------------------|-------------------------:---------------------:-------------------| 100%|
-| 1      | 20521990      | Bùi Văn Thuận     |20521990@gm.uit.edu.vn   |Làm slide, báo cáo, code và demo phần Huffman. Xây dựng chương trình ứng dụng|100%|
+| 1      | 20521990      | Bùi Văn Thuận     |20521990@gm.uit.edu.vn   |Làm slide, báo cáo, code và demo phần Huffman.Xây dựng chương trình ứngdụng|100%|
 | 2      | 20521826      | Lữ Thị Thúy Quỳnh |20521826@gm.uit.edu.vn   |Làm slide, báo cáo, code và demo phần LZW.|100%|
 | 3      | 20522127      | Trần Vĩnh Tuân    |20522127@gm.uit.edu.vn   |Làm slide, báo cáo, code và demo phần Shannon Fano|100%|
 
